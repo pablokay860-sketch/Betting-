@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 // Sample data: betting odds
 const bets = [
@@ -18,6 +20,11 @@ app.get('/api/bets', (req, res) => {
   res.json(bets);
 });
 
-app.listen(port, () => {
-  console.log(`Backend running at http://localhost:${port}`);
+// Serve static files
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Backend running at http://0.0.0.0:${port}`);
 });
