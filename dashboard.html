@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betting Platform - Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #111118 0%, #1a1a25 100%);
+            color: #E8E8F0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #FFD234;
+        }
+
+        h1 {
+            color: #FFD234;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(255, 210, 52, 0.3);
+        }
+
+        .subtitle {
+            color: #A8A8B8;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: rgba(26, 26, 34, 0.9);
+            border: 1px solid #333340;
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover {
+            border-color: #FFD234;
+            box-shadow: 0 8px 32px rgba(255, 210, 52, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #FFD234;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: rgba(255, 210, 52, 0.05);
+            border: 2px solid #FFD234;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            background: rgba(255, 210, 52, 0.15);
+            transform: scale(1.05);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            color: #FFD234;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #A8A8B8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Match Distribution */
+        .match-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .match-type {
+            background: #222230;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 3px solid #FFD234;
+        }
+
+        .match-type-title {
+            color: #FFD234;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .match-count {
+            font-size: 1.8rem;
+            color: #E8E8F0;
+        }
+
+        /* League Distribution */
+        .league-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .league-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid #333340;
+            transition: all 0.2s ease;
+        }
+
+        .league-item:hover {
+            background: rgba(255, 210, 52, 0.05);
+            padding-left: 1rem;
+        }
+
+        .league-name {
+            color: #E8E8F0;
+        }
+
+        .league-count {
+            background: #FFD234;
+            color: #111118;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Odds Statistics */
+        .odds-stats {
+            margin-top: 1rem;
+        }
+
+        .odd-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #333340;
+        }
+
+        .odd-stat-label {
+            color: #A8A8B8;
+        }
+
+        .odd-stat-value {
+            color: #FFD234;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #333340;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFD234, #FFC80A);
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333340;
+            color: #A8A8B8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎲 Betting Platform Analytics</h1>
+            <p class="subtitle">Real-time sports betting metrics and statistics</p>
+        </header>
+
+        <!-- Key Statistics -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number" id="total-matches">9</div>
+                <div class="stat-label">Total Matches</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="live-count">2</div>
+                <div class="stat-label">🔴 Live Now</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="today-count">3</div>
+                <div class="stat-label">📅 Today</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="future-count">4</div>
+                <div class="stat-label">🗓️ Upcoming</div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="dashboard-grid">
+            <!-- Match Distribution -->
+            <div class="card">
+                <h2>📊 Match Distribution by Category</h2>
+                <div class="chart-container">
+                    <canvas id="matchDistributionChart"></canvas>
+                </div>
+                <div class="match-info">
+                    <div class="match-type">
+                        <div class="match-type-title">Live</div>
+                        <div class="match-count">2</div>
+                    </div>
+                    <div class="match-type">
+                        <div class="match-type-title">Today</div>
+                        <div class="match-count">3</div>
+                    </div>
+                    <div class="match-type">
+                        <div class="match-type-title">Future</div>
+                        <div class="match-count">4</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- League Distribution -->
+            <div class="card">
+                <h2>🏆 Matches by League</h2>
+                <ul class="league-list">
+                    <li class="league-item">
+                        <span class="league-name">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</span>
+                        <span class="league-count">5</span>
+                    </li>
+                    <li class="league-item">
+                        <span class="league-name">🇪🇸 La Liga</span>
+                        <span class="league-count">1</span>
+                    </li>
+                    <li class="league-item">
+                        <span class="league-name">🏀 NBA</span>
+                        <span class="league-count">1</span>
+                    </li>
+                    <li class="league-item">
+                        <span class="league-name">🏅 Champions League</span>
+                        <span class="league-count">1</span>
+                    </li>
+                    <li class="league-item">
+                        <span class="league-name">🎾 Tennis</span>
+                        <span class="league-count">1</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Average Odds Analysis -->
+            <div class="card">
+                <h2>💰 Average Odds Analysis</h2>
+                <div class="odds-stats">
+                    <div class="odd-stat">
+                        <span class="odd-stat-label">Average Home Odds</span>
+                        <span class="odd-stat-value">2.33</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%;"></div>
+                    </div>
+
+                    <div class="odd-stat">
+                        <span class="odd-stat-label">Average Draw Odds</span>
+                        <span class="odd-stat-value">3.17</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%;"></div>
+                    </div>
+
+                    <div class="odd-stat">
+                        <span class="odd-stat-label">Average Away Odds</span>
+                        <span class="odd-stat-value">2.78</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 89%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Odds Range Distribution -->
+            <div class="card">
+                <h2>📈 Odds Range Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="oddsRangeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Sports Type Breakdown -->
+            <div class="card">
+                <h2>🎯 Sports Type Breakdown</h2>
+                <div class="chart-container">
+                    <canvas id="sportsTypeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Match Time Distribution -->
+            <div class="card">
+                <h2>⏰ Match Time Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="matchTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📊 Data updated in real-time | Last refresh: <span id="last-update">Just now</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Chart.js color palette
+        const colors = {
+            primary: '#FFD234',
+            secondary: '#FF6B6B',
+            tertiary: '#4ECDC4',
+            quaternary: '#95E1D3',
+            quinary: '#F38181'
+        };
+
+        // Match Distribution Pie Chart
+        const matchDistributionCtx = document.getElementById('matchDistributionChart').getContext('2d');
+        new Chart(matchDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['🔴 Live', '📅 Today', '🗓️ Future'],
+                datasets: [{
+                    data: [2, 3, 4],
+                    backgroundColor: ['#FF6B6B', '#FFD234', '#4ECDC4'],
+                    borderColor: '#1a1a22',
+                    borderWidth: 3,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#E8E8F0', font: { size: 12 } }
+                    }
+                }
+            }
+        });
+
+        // Odds Range Distribution
+        const oddsRangeCtx = document.getElementById('oddsRangeChart').getContext('2d');
+        new Chart(oddsRangeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1.5-2.0', '2.0-2.5', '2.5-3.0', '3.0-3.5'],
+                datasets: [{
+                    label: 'Number of Odds',
+                    data: [2, 6, 8, 4],
+                    backgroundColor: '#FFD234',
+                    borderColor: '#FFC80A',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { labels: { color: '#E8E8F0' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#A8A8B8' }, grid: { color: '#333340' } },
+                    y: { ticks: { color: '#A8A8B8' }, grid: { color: '#333340' } }
+                }
+            }
+        });
+
+        // Sports Type Breakdown (Pie)
+        const sportsTypeCtx = document.getElementById('sportsTypeChart').getContext('2d');
+        new Chart(sportsTypeCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Football', 'Basketball', 'Tennis'],
+                datasets: [{
+                    data: [7, 1, 1],
+                    backgroundColor: ['#FFD234', '#FF6B6B', '#4ECDC4'],
+                    borderColor: '#1a1a22',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#E8E8F0', font: { size: 12 } } }
+                }
+            }
+        });
+
+        // Match Time Distribution (Line)
+        const matchTimeCtx = document.getElementById('matchTimeChart').getContext('2d');
+        new Chart(matchTimeCtx, {
+            type: 'line',
+            data: {
+                labels: ['14:00', '15:00', '18:00', '19:30', '20:00'],
+                datasets: [{
+                    label: 'Matches Scheduled',
+                    data: [0, 1, 1, 1, 3],
+                    borderColor: '#FFD234',
+                    backgroundColor: 'rgba(255, 210, 52, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#FFD234',
+                    pointBorderColor: '#1a1a22',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#E8E8F0' } }
+                },
+                scales: {
+                    y: { 
+                        ticks: { color: '#A8A8B8' },
+                        grid: { color: '#333340' },
+                        beginAtZero: true
+                    },
+                    x: { 
+                        ticks: { color: '#A8A8B8' },
+                        grid: { color: '#333340' }
+                    }
+                }
+            }
+        });
+
+        // Update last refresh time
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+    </script>
+</body>
+</html>
