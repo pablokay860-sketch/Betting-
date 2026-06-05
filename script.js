@@ -1,7 +1,11 @@
 async function loadBets() {
   const container = document.getElementById('bets-container');
   try {
-    const res = await fetch('http://localhost:3000/api/bets');
+    const backendUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3000' 
+      : `${window.location.protocol}//${window.location.host}`;
+    
+    const res = await fetch(`${backendUrl}/api/bets`);
     const bets = await res.json();
 
     container.innerHTML = bets.map(bet => `
