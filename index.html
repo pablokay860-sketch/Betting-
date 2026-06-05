@@ -3,16 +3,390 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fullstack Betting Example</title>
+<title>Live Betting Platform</title>
 <style>
-body { font-family: Arial, sans-serif; padding: 2rem; background:#111118; color:#E8E8F0; }
-h1 { color: #FFD234; }
-.bet { margin-bottom:1rem; padding:1rem; border:1px solid #222230; border-radius:4px; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #111118;
+  color: #E8E8F0;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #222230;
+}
+
+h1 {
+  color: #FFD234;
+  font-size: 2.5rem;
+}
+
+.header-info {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.user-section {
+  text-align: right;
+}
+
+.user-info {
+  color: #A8A8B8;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.stats {
+  font-size: 0.85rem;
+  color: #FFD234;
+}
+
+/* Registration Section */
+.registration-section {
+  background: #1a1a22;
+  border: 2px solid #FFD234;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.registration-section h2 {
+  color: #FFD234;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #E8E8F0;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  background: #222230;
+  border: 1px solid #333340;
+  border-radius: 4px;
+  color: #E8E8F0;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #FFD234;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-register {
+  background: #FFD234;
+  color: #111118;
+  font-weight: bold;
+  flex: 1;
+}
+
+.btn-register:hover {
+  background: #FFC80A;
+  transform: scale(1.02);
+}
+
+.btn-register:disabled {
+  background: #888888;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
+.status-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  display: none;
+}
+
+.status-message.success {
+  background: #1a4d1a;
+  color: #90EE90;
+  border: 1px solid #66BB6A;
+  display: block;
+}
+
+.status-message.error {
+  background: #4d1a1a;
+  color: #FF6B6B;
+  border: 1px solid #E53935;
+  display: block;
+}
+
+.status-message.info {
+  background: #1a2a4d;
+  color: #87CEEB;
+  border: 1px solid #2196F3;
+  display: block;
+}
+
+/* Tabs Section */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #222230;
+}
+
+.tab {
+  padding: 1rem 2rem;
+  background: none;
+  border: none;
+  color: #A8A8B8;
+  cursor: pointer;
+  font-size: 1rem;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab.active {
+  color: #FFD234;
+  border-bottom-color: #FFD234;
+}
+
+.tab:hover {
+  color: #E8E8F0;
+}
+
+/* Matches Section */
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.match-card {
+  background: #1a1a22;
+  border: 1px solid #333340;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.match-card:hover {
+  border-color: #FFD234;
+  box-shadow: 0 0 20px rgba(255, 210, 52, 0.2);
+}
+
+.match-header {
+  margin-bottom: 1rem;
+}
+
+.match-league {
+  font-size: 0.75rem;
+  color: #888888;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.match-time {
+  font-size: 0.9rem;
+  color: #FFD234;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.match-time.live {
+  color: #FF6B6B;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.match-event {
+  font-size: 1.1rem;
+  color: #E8E8F0;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.odds-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.odd {
+  background: #222230;
+  padding: 0.75rem;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #333340;
+}
+
+.odd:hover {
+  background: #333340;
+  border-color: #FFD234;
+  transform: scale(1.05);
+}
+
+.odd-label {
+  font-size: 0.8rem;
+  color: #888888;
+  margin-bottom: 0.3rem;
+}
+
+.odd-value {
+  font-size: 1.3rem;
+  color: #FFD234;
+  font-weight: bold;
+}
+
+.match-date {
+  font-size: 0.85rem;
+  color: #A8A8B8;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333340;
+}
+
+.no-matches {
+  text-align: center;
+  padding: 2rem;
+  color: #888888;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.loading {
+  text-align: center;
+  color: #888888;
+  padding: 2rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #333340;
+  border-top: 3px solid #FFD234;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
-<h1>Live Bets</h1>
-<div id="bets-container">Loading...</div>
+<div class="container">
+  <header>
+    <h1>🎲 Betting Platform</h1>
+    <div class="header-info">
+      <div class="user-section">
+        <div class="user-info" id="user-display">Not logged in</div>
+        <div class="stats" id="user-stats">Total Users: <span id="user-count">0</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Registration Section -->
+  <div class="registration-section" id="registration-section">
+    <h2>Join Our Betting Platform</h2>
+    <p style="margin-bottom: 1.5rem; color: #A8A8B8;">Register once and start betting on your favorite matches!</p>
+    <form id="registration-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+      </div>
+      <div class="button-group">
+        <button type="submit" class="btn-register" id="register-btn">Register / Login</button>
+      </div>
+    </form>
+    <div class="status-message" id="status-message"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="live">🔴 Live Matches</button>
+    <button class="tab" data-tab="today">📅 Today's Matches</button>
+    <button class="tab" data-tab="future">🗓️ Future Matches</button>
+  </div>
+
+  <!-- Live Matches -->
+  <div id="live" class="tab-content active">
+    <div class="matches-grid" id="live-container">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Today's Matches -->
+  <div id="today" class="tab-content">
+    <div class="matches-grid" id="today-container">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Future Matches -->
+  <div id="future" class="tab-content">
+    <div class="matches-grid" id="future-container">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>
